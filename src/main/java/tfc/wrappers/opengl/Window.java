@@ -1,6 +1,7 @@
 package tfc.wrappers.opengl;
 
 import org.lwjgl.glfw.GLFWWindowCloseCallbackI;
+import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -21,6 +22,7 @@ public class Window {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		handle = glfwCreateWindow(100, 100, "~∃(x)(H(x) ^ I(x))", NULL, NULL);
 		grabContext();
+		GL.createCapabilities();
 		glfwSwapInterval(0);
 		releaseContext();
 	}

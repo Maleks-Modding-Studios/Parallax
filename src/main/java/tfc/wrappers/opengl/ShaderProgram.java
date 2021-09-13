@@ -75,4 +75,8 @@ public class ShaderProgram {
 //		GL.UniformMatrix4(getUniformLocation(name), true, ref matrix1);
 		GL40.glUniformMatrix4dv(getUniformLocation(name), true, matrix);
 	}
+	
+	public void uniformVec4f(String name, float x, float y, float z, float w) {
+		GL40.glUniformMatrix4fv(getUniformLocation(name), true, new float[]{x, y, z, w});
+	}
 }

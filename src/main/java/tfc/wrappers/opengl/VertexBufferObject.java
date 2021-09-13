@@ -6,7 +6,7 @@ public class VertexBufferObject {
 	private final int id;
 	private final int target;
 	
-	public VertexBufferObject(int target, double[] data) {
+	public VertexBufferObject(int target, float[] data) {
 		this.target = target;
 		id = GL20.glGenBuffers();
 		bind();
@@ -21,7 +21,7 @@ public class VertexBufferObject {
 		GL20.glBindBuffer(target, 0);
 	}
 	
-	public void upload(double[] data) {
+	public void upload(float[] data) {
 		GL20.glBufferData(target, data, GL20.GL_STATIC_DRAW);
 	}
 	
