@@ -61,7 +61,7 @@ public class Element {
 		return endY;
 	}
 	
-	public void addChild(Element other) {
+	public Element addChild(Element other) {
 //		double x = other.startX;
 //		double y = other.startY;
 //		double w = other.endX;
@@ -70,6 +70,7 @@ public class Element {
 //		if (w > startX && h > startY && startX < x && y < endY) {
 			children.add(other);
 //		}
+		return other;
 	}
 	
 	public void onTick(double mouseX, double mouseY, double posX, double posY, Window window) {
@@ -77,7 +78,7 @@ public class Element {
 			if (child.fillY) {
 				child.endY = endY;
 			}
-			double cPosX = child.startX - (posX - (startX * 1.5));
+			double cPosX = child.startX + (posX * 2);
 			if (child.isRightAligned) {
 				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
@@ -92,7 +93,7 @@ public class Element {
 			if (child.fillY) {
 				child.endY = endY;
 			}
-			double cPosX = child.startX - (posX - (startX * 1.5));
+			double cPosX = child.startX + (posX * 2);
 			if (child.isRightAligned) {
 				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
@@ -109,15 +110,18 @@ public class Element {
 		Matrix4 oldBase = baseMatrix;
 		for (Element child : children) {
 			if (!child.isRightAligned) {
+//				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));
 				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));
-				if (!child.isRightAligned) oldBase = matrix4;
+				oldBase = matrix4;
 				matrix4 = matrix4.multiply(Matrix4.createScaleMatrix(new Vector4(child.endX - child.startX, child.fillY ? (endY - child.startY) : (child.endY - child.startY), 1, 1)));
 			} else {
-				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4((endX - (child.startX)) - startX, child.startY, 0, 1)));
-				matrix4 = matrix4.multiply(Matrix4.createScaleMatrix(new Vector4(child.startX - child.endX, child.fillY ? (endY - child.startY) : (child.endY - child.startY), 1, 1)));
+				double cPosX = Math.abs(startX - endX) - child.startX ;
+				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(cPosX, child.startY, 0, 1)));
+				oldBase = matrix4;
+				matrix4 = matrix4.multiply(Matrix4.createScaleMatrix(new Vector4(Math.abs(child.startX - child.endX), child.fillY ? (endY - child.startY) : (child.endY - child.startY), 1, 1)));
 			}
 			// TODO: setup matrix for top aligned elements
-			child.draw(matrix4, child.isRightAligned ? baseMatrix : oldBase);
+			child.draw(matrix4, child.isRightAligned ? oldBase : oldBase);
 		}
 	}
 	
@@ -126,7 +130,7 @@ public class Element {
 			if (child.fillY) {
 				child.endY = endY;
 			}
-			double cPosX = child.startX - (posX - (startX * 1.5));
+			double cPosX = child.startX + (posX * 2);
 			if (child.isRightAligned) {
 				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
