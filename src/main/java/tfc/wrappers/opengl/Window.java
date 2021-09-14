@@ -14,6 +14,8 @@ public class Window {
 	private final double[] mouseX = new double[]{-1};
 	private final double[] mouseY = new double[]{-1};
 	
+	protected long cursor;
+	
 	private final GLFWUtils glfwUtils = new GLFWUtils();
 	
 	public Window() {
@@ -24,6 +26,7 @@ public class Window {
 		grabContext();
 		GL.createCapabilities();
 		glfwSwapInterval(0);
+		setCursor(GLFW_ARROW_CURSOR);
 		releaseContext();
 	}
 	
@@ -39,12 +42,16 @@ public class Window {
 		glfwMakeContextCurrent(handle);
 	}
 	
+	public void startFrame() {
+		glfwGetWindowSize(handle, width, height);
+		glfwGetCursorPos(handle, mouseX, mouseY);
+	}
+	
 	public void endFrame() {
 		glfwSwapBuffers(handle);
 		glfwPollEvents();
 		
-		glfwGetWindowSize(handle, width, height);
-		glfwGetCursorPos(handle, mouseX, mouseY);
+		glfwSetCursor(handle, cursor);
 	}
 	
 	public void setVisible(boolean value) {
@@ -93,7 +100,8 @@ public class Window {
 	}
 	
 	public void setCursor(int cursor) {
-		glfwSetCursor(handle, glfwUtils.getCursor(cursor));
+//		glfwSetCursor(handle, glfwUtils.getCursor(cursor));
+		this.cursor = glfwUtils.getCursor(cursor);
 	}
 	
 	public boolean isMouseButtonDown(int button) {

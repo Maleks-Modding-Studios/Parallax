@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL20;
 import tfc.utils.rendering.general.Color;
 import tfc.utils.rendering.ui.PanelElement;
+import tfc.utils.rendering.ui.ResizePolicy;
 import tfc.utils.vecmath.Matrix4;
 import tfc.utils.vecmath.Vector4;
 import tfc.wrappers.opengl.Shader;
@@ -21,6 +22,8 @@ public class Launch {
 	public static ShaderProgram shaderProgram;
 	public static int buffer;
 	public static PanelElement panel;
+	
+	protected static boolean[] lastFrameMouseStates = new boolean[]{false, false, false};
 	
 	public static void main(String[] args) {
 		GLFW.glfwInit();
@@ -55,7 +58,7 @@ public class Launch {
 							"\tgl_Position = position * modelView;\n" +
 							"}\n"
 			);
-			shaderProgram = new ShaderProgram(new Shader[] { frag, vert });
+			shaderProgram = new ShaderProgram(new Shader[]{frag, vert});
 			shaderProgram.link();
 			shaderProgram.start();
 			shaderProgram.getUniformLocation("modelView");
@@ -83,11 +86,27 @@ public class Launch {
 		
 		window.releaseContext();
 		
-		panel = new MainPanel(0, 0, 255, 255, new Color(255, 255, 255, 255), ()->{
+		panel = new MainPanel(0, 0, 255, 255, new Color(200, 200, 255, 255).darker(0.3f, 32f), () -> {
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		},  shaderProgram, window);
+		}, shaderProgram, window);
+		panel.addChild(
+				new PanelElement(
+						330, 0, 300, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
+					glBindBuffer(GL_ARRAY_BUFFER, buffer);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned(true).setFillY(true)
+		);
+		panel.addChild(
+				new PanelElement(
+						50, 0, 70, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
+					glBindBuffer(GL_ARRAY_BUFFER, buffer);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setFillY(true)
+		);
 		
 		while (isOpen[0]) {
 			mainLoop();
@@ -103,7 +122,10 @@ public class Launch {
 	}
 	
 	private static void mainLoop() {
+//		long startTime = System.nanoTime();
+		
 		window.grabContext();
+		window.startFrame();
 		Matrix4 matrix4 = Matrix4.identity();
 		glViewport(-1, -1, window.getWidth() + 1, window.getHeight() + 1);
 		
@@ -116,7 +138,19 @@ public class Launch {
 				1, 1
 		)));
 		
-		panel.draw(matrix4);
+		window.setCursor(GLFW.GLFW_ARROW_CURSOR);
+		panel.onHovered(window.getMouseX(), window.getMouseY(), 0, 0, window);
+		if (window.isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+			if (!lastFrameMouseStates[0]) {
+				panel.onClicked(window.getMouseX(), window.getMouseY(), 0, 0, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+				lastFrameMouseStates[0] = true;
+			}
+		} else {
+			lastFrameMouseStates[0] = false;
+		}
+		panel.onTick(window.getMouseX(), window.getMouseY(), 0, 0, window);
+		
+		panel.draw(matrix4, matrix4);
 		
 		shaderProgram.start();
 		shaderProgram.uniformMatrix4("modelView", matrix4.toArray());
@@ -128,5 +162,7 @@ public class Launch {
 //		mainPanel.draw(matrix4);
 		window.endFrame();
 		window.releaseContext();
+		
+//		System.out.println(1.0 / ((System.nanoTime() - startTime) / 1000000000d));
 	}
 }
