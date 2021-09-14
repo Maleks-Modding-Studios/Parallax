@@ -41,7 +41,7 @@ public class Element {
 		mouseX -= posX;
 		mouseY -= posY;
 		return
-				mouseX >= 0 && mouseX <= ((isRightAligned ? (startX - endX) : (Math.abs((startX - endX)))) / 2) &&
+				mouseX >= 0 && mouseX <= ((isRightAligned ? Math.abs(startX - endX) : (Math.abs((startX - endX)))) / 2) &&
 						mouseY >= 0 && mouseY <= (endY / 2);
 	}
 	
@@ -77,9 +77,9 @@ public class Element {
 			if (child.fillY) {
 				child.endY = endY;
 			}
-			double cPosX = child.startX - posX;
+			double cPosX = child.startX - (posX - (startX * 1.5));
 			if (child.isRightAligned) {
-				cPosX = (endX - (child.startX));
+				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
 			cPosX /= 2;
 			double cPosY = child.startY - posY;
@@ -92,9 +92,9 @@ public class Element {
 			if (child.fillY) {
 				child.endY = endY;
 			}
-			double cPosX = child.startX - posX;
+			double cPosX = child.startX - (posX - (startX * 1.5));
 			if (child.isRightAligned) {
-				cPosX = (endX - (child.startX));
+				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
 			cPosX /= 2;
 			double cPosY = child.startY - posY;
@@ -106,16 +106,18 @@ public class Element {
 	
 	public void draw(Matrix4 matrix4, Matrix4 baseMatrix) {
 		Matrix4 oldMatrix = baseMatrix;
+		Matrix4 oldBase = baseMatrix;
 		for (Element child : children) {
 			if (!child.isRightAligned) {
 				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));
+				if (!child.isRightAligned) oldBase = matrix4;
 				matrix4 = matrix4.multiply(Matrix4.createScaleMatrix(new Vector4(child.endX - child.startX, child.fillY ? (endY - child.startY) : (child.endY - child.startY), 1, 1)));
 			} else {
-				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4((endX - (child.startX)), child.startY, 0, 1)));
+				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4((endX - (child.startX)) - startX, child.startY, 0, 1)));
 				matrix4 = matrix4.multiply(Matrix4.createScaleMatrix(new Vector4(child.startX - child.endX, child.fillY ? (endY - child.startY) : (child.endY - child.startY), 1, 1)));
 			}
 			// TODO: setup matrix for top aligned elements
-			child.draw(matrix4, baseMatrix);
+			child.draw(matrix4, child.isRightAligned ? baseMatrix : oldBase);
 		}
 	}
 	
@@ -124,9 +126,9 @@ public class Element {
 			if (child.fillY) {
 				child.endY = endY;
 			}
-			double cPosX = child.startX - posX;
+			double cPosX = child.startX - (posX - (startX * 1.5));
 			if (child.isRightAligned) {
-				cPosX = (endX - (child.startX));
+				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
 			cPosX /= 2;
 			double cPosY = child.startY - posY;

@@ -91,21 +91,37 @@ public class Launch {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}, shaderProgram, window);
-		panel.addChild(
-				new PanelElement(
-						330, 0, 300, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
+//		panel.addChild(
+//				new PanelElement(
+//						330, 0, 300, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
+//					glBindBuffer(GL_ARRAY_BUFFER, buffer);
+//					glDrawArrays(GL_TRIANGLES, 0, 6);
+//					glBindBuffer(GL_ARRAY_BUFFER, 0);
+//				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned(true).setFillY(true)
+//		);
+		PanelElement panel1 =
+				(PanelElement) new PanelElement(
+						10, 0, 100, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
 					glBindBuffer(GL_ARRAY_BUFFER, buffer);
 					glDrawArrays(GL_TRIANGLES, 0, 6);
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
-				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned(true).setFillY(true)
-		);
-		panel.addChild(
+				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setFillY(true);
+		panel.addChild(panel1);
+		panel1.addChild(
 				new PanelElement(
-						50, 0, 70, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
+						20, 0, 50, 255, new Color(200, 200, 255, 255).darker(0.2f, 32f), () -> {
 					glBindBuffer(GL_ARRAY_BUFFER, buffer);
 					glDrawArrays(GL_TRIANGLES, 0, 6);
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setFillY(true)
+		);
+		panel1.addChild(
+				new PanelElement(
+						70, 0, 80, 255, new Color(200, 200, 255, 255).darker(0.2f, 32f), () -> {
+					glBindBuffer(GL_ARRAY_BUFFER, buffer);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned(true).setFillY(true)
 		);
 		
 		while (isOpen[0]) {
