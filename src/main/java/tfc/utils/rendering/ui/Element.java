@@ -9,6 +9,11 @@ public class Element {
 	protected double startY;
 	protected double endX;
 	protected double endY;
+	protected boolean isRightAligned;
+	
+	public void setRightAligned(boolean val) {
+		isRightAligned = val;
+	}
 	
 	protected final ArrayList<Element> children = new ArrayList<>();
 	
@@ -58,6 +63,9 @@ public class Element {
 	
 	public void draw(Matrix4 matrix4) {
 		for (Element child : children) {
+			// TODO: setup matrix
+			// TODO: setup matrix for right aligned elements
+			// TODO: setup matrix for top aligned elements
 			child.draw(matrix4);
 		}
 	}

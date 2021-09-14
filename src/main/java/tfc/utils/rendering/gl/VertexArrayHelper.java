@@ -10,9 +10,9 @@ public class VertexArrayHelper {
 	public VertexArrayHelper(VertexArrayObject vao, VertexBufferObject vbo) {
 		this.vao = vao;
 		this.vbo = vbo;
-		vao.bind();
-		vbo.bind();
-		vao.unbind();
+//		vao.bind();
+//		vbo.bind();
+//		vao.unbind();
 	}
 	
 	public void draw(int type) {

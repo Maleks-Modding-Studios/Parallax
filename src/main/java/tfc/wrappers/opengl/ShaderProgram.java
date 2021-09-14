@@ -2,8 +2,13 @@ package tfc.wrappers.opengl;
 
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL40;
+import org.lwjgl.system.MemoryUtil;
 
+import java.nio.FloatBuffer;
 import java.util.HashMap;
+
+import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
+import static org.lwjgl.opengl.GL20.glGetProgrami;
 
 public class ShaderProgram {
 	private final int id;
@@ -26,6 +31,10 @@ public class ShaderProgram {
 	
 	public void link() {
 		GL40.glLinkProgram(id);
+		GL40.glValidateProgram(id);
+		if (glGetProgrami(id, GL_VALIDATE_STATUS) == 0) {
+			System.err.println(GL20.glGetProgramInfoLog(id));
+		}
 	}
 	
 	public void delete() {
@@ -73,10 +82,20 @@ public class ShaderProgram {
 //		matrix1.M44 = (float) matrix[15];
 //
 //		GL.UniformMatrix4(getUniformLocation(name), true, ref matrix1);
-		GL40.glUniformMatrix4dv(getUniformLocation(name), true, matrix);
+		int pointer = getUniformLocation(name);
+		// no reason writing the matrix to a float buffer and uploading it if the uniform is unused
+		if (pointer == -1) return;
+		
+		FloatBuffer matrixBuffer = MemoryUtil.memAllocFloat(16);
+		for (int i = 0; i < matrix.length; i++) {
+			matrixBuffer.put(i, (float) matrix[i]);
+		}
+//		matrixBuffer.flip();
+		GL40.glUniformMatrix4fv(pointer, false, matrixBuffer);
+		MemoryUtil.memFree(matrixBuffer);
 	}
 	
 	public void uniformVec4f(String name, float x, float y, float z, float w) {
-		GL40.glUniformMatrix4fv(getUniformLocation(name), true, new float[]{x, y, z, w});
+		GL40.glUniform4f(getUniformLocation(name), x, y, z, w);
 	}
 }

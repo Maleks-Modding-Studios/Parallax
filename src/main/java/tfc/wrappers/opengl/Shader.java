@@ -10,7 +10,7 @@ public class Shader {
 		GL40.glShaderSource(id, contents);
 		GL40.glCompileShader(id);
 		String log = GL40.glGetShaderInfoLog(id);
-		if (log != "") System.out.println(log);
+		if (log != "") System.err.println(log);
 	}
 	
 	public int getId() {
