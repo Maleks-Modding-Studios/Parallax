@@ -28,7 +28,12 @@ public class PanelElement extends Element {
 	@Override
 	public void draw(Matrix4 thisMatrix, Matrix4 baseMatrix) {
 		program.start();
-		program.uniformVec4f("colMultiplier", color.getRed() / 255f, color.getGreen() / 255f, color.getGreen() / 255f, color.getAlpha() / 255f);
+		if (this.isFocused) {
+			Color color = this.color.hueshift(-50);
+			program.uniformVec4f("colMultiplier", color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+		} else {
+			program.uniformVec4f("colMultiplier", color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+		}
 		program.uniformMatrix4("modelView", thisMatrix.toArray());
 		drawFunc.run();
 		program.finish();

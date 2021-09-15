@@ -31,10 +31,10 @@ public class Launch {
 		window = new Window();
 		window.setVisible(true);
 		boolean[] isOpen = new boolean[]{true};
-		window.addCloseListener((w) -> isOpen[0] = false);
+		window.setCloseListener((w) -> isOpen[0] = false);
 		
 		window.grabContext();
-		window.allowVsync(true);
+		window.allowVsync(false);
 		
 		{
 			Shader frag = new Shader(GL20.GL_FRAGMENT_SHADER,
@@ -86,46 +86,59 @@ public class Launch {
 		
 		window.releaseContext();
 		
-		panel = new MainPanel(0, 0, 255, 255, new Color(200, 200, 255, 255).darker(0.3f, 32f), () -> {
+		panel = new MainPanel(0, 0, 255, 255, new Color(225, 225, 255, 255).darker(0.3f, 16f), () -> {
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}, shaderProgram, window);
 		
+		window.setScrollListener((window1, xoffset, yoffset) -> {
+			panel.onScroll(window.getMouseX(), window.getMouseY(), 0, 0, xoffset, yoffset, window);
+		});
+		
+		window.setKeyListener((window1, key, scan, action, mods) -> {
+			panel.onTyped((char) key, key);
+		});
+		
 		VerticallyDistributedPanelElement panel1 = (VerticallyDistributedPanelElement) new VerticallyDistributedPanelElement(
 				0, 0, 340, 255,
-				new Color(200, 200, 255).darker(0.25f, 32f),
+				new Color(225, 225, 255).darker(0.25f, 16f),
 				() -> {
 					glBindBuffer(GL_ARRAY_BUFFER, buffer);
 					glDrawArrays(GL_TRIANGLES, 0, 6);
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}, shaderProgram, 40
 		).setFillY(true);
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 51; i++) {
 			PanelElement element = new PanelElement(
 					8, 0, 300 - 7, 255,
-					new Color(200, 200, 255).darker(0.1f, 32f),
+					new Color(225, 225, 255).darker(0.5f, 16f),
 					() -> {
 						glBindBuffer(GL_ARRAY_BUFFER, buffer);
 						glDrawArrays(GL_TRIANGLES, 0, 6);
 						glBindBuffer(GL_ARRAY_BUFFER, 0);
 					}, shaderProgram
 			);
-			element.addChild(new PanelElement(
-					0, 1, 300 - 15, 38,
-					new Color(200, 200, 255).darker(0.5f, 32f),
-					() -> {
-						glBindBuffer(GL_ARRAY_BUFFER, buffer);
-						glDrawArrays(GL_TRIANGLES, 0, 6);
-						glBindBuffer(GL_ARRAY_BUFFER, 0);
-					}, shaderProgram
-			));
+//			element.addChild(new PanelElement(
+//					0, 2, 300 - 15, 38,
+//					new Color(i % 255, 200, 255).darker(0.5f, 32f),
+//					() -> {
+//						glBindBuffer(GL_ARRAY_BUFFER, buffer);
+//						glDrawArrays(GL_TRIANGLES, 0, 6);
+//						glBindBuffer(GL_ARRAY_BUFFER, 0);
+//					}, shaderProgram
+//			));
 			panel1.addChild(element);
 		}
 		panel.addChild(panel1);
 		
 		while (isOpen[0]) {
 			mainLoop();
+			try {
+				// this is really just here to prevent java from causing the fans to spin up
+				Thread.sleep(0, 1);
+			} catch (Throwable ignored) {
+			}
 		}
 		
 		window.grabContext();
@@ -136,6 +149,8 @@ public class Launch {
 		
 		Runtime.getRuntime().exit(0);
 	}
+	
+	private static double endLastFrame = System.nanoTime();
 	
 	private static void mainLoop() {
 //		long startTime = System.nanoTime();
@@ -155,7 +170,7 @@ public class Launch {
 		)));
 		
 		window.setCursor(GLFW.GLFW_ARROW_CURSOR);
-		panel.update();
+		panel.update(24 / ((System.nanoTime() - endLastFrame) * 0.001));
 		panel.onHovered(window.getMouseX(), window.getMouseY(), 0, 0, window);
 		if (window.isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			if (!lastFrameMouseStates[0]) {
@@ -168,18 +183,19 @@ public class Launch {
 		panel.onTick(window.getMouseX(), window.getMouseY(), 0, 0, window);
 		
 		panel.draw(matrix4, matrix4);
+//		System.out.println(1.0 / ((System.nanoTime() - startTime) / 1000000000d));
 		
-		shaderProgram.start();
-		shaderProgram.uniformMatrix4("modelView", matrix4.toArray());
-		shaderProgram.uniformVec4f("colMultiplier", 1, 0.5f, 1, 1);
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		shaderProgram.finish();
+//		shaderProgram.start();
+//		shaderProgram.uniformMatrix4("modelView", matrix4.toArray());
+//		shaderProgram.uniformVec4f("colMultiplier", 1, 0.5f, 1, 1);
+//		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+//		glDrawArrays(GL_TRIANGLES, 0, 6);
+//		glBindBuffer(GL_ARRAY_BUFFER, 0);
+//		shaderProgram.finish();
 //		mainPanel.draw(matrix4);
 		window.endFrame();
 		window.releaseContext();
 		
-//		System.out.println(1.0 / ((System.nanoTime() - startTime) / 1000000000d));
+		endLastFrame = System.nanoTime();
 	}
 }

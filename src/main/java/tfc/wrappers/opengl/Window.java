@@ -1,7 +1,11 @@
 package tfc.wrappers.opengl;
 
+import org.lwjgl.glfw.GLFWKeyCallbackI;
+import org.lwjgl.glfw.GLFWScrollCallbackI;
 import org.lwjgl.glfw.GLFWWindowCloseCallbackI;
 import org.lwjgl.opengl.GL;
+
+import java.util.HashMap;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -18,6 +22,8 @@ public class Window {
 	
 	private final GLFWUtils glfwUtils = new GLFWUtils();
 	
+	private final HashMap<Integer, Boolean> keyPressStates = new HashMap<>();
+	
 	public Window() {
 		glfwDefaultWindowHints();
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
@@ -28,6 +34,7 @@ public class Window {
 		glfwSwapInterval(0);
 		setCursor(GLFW_ARROW_CURSOR);
 		releaseContext();
+		glfwSetKeyCallback(handle, keyTracker);
 	}
 	
 	public void allowVsync(boolean val) {
@@ -75,8 +82,23 @@ public class Window {
 		glfwSetWindowSize(handle, this.width[0] = width, this.height[0] = height);
 	}
 	
-	public void addCloseListener(GLFWWindowCloseCallbackI action) {
+	public void setCloseListener(GLFWWindowCloseCallbackI action) {
 		glfwSetWindowCloseCallback(handle, action);
+	}
+	
+	public void setScrollListener(GLFWScrollCallbackI action) {
+		glfwSetScrollCallback(handle, action);
+	}
+	
+	GLFWKeyCallbackI keyListener;
+	GLFWKeyCallbackI keyTracker = ((window, key, scancode, action, mods) -> {
+		if (action == 1) keyPressStates.put(key, true);
+		else if (action == 0) keyPressStates.remove(key);
+		if (keyListener != null) keyListener.invoke(window, key, scancode, action, mods);
+	});
+	
+	public void setKeyListener(GLFWKeyCallbackI callback) {
+		keyListener = callback;
 	}
 	
 	public int getWidth() {
@@ -92,7 +114,7 @@ public class Window {
 	}
 	
 	public double getMouseY() {
-		return mouseY[0];
+		return height[0] - mouseY[0] + 10;
 	}
 	
 	public void destroy() {

@@ -3,30 +3,44 @@ package tfc.utils.rendering.ui;
 import tfc.utils.rendering.general.Color;
 import tfc.utils.vecmath.Matrix4;
 import tfc.wrappers.opengl.ShaderProgram;
+import tfc.wrappers.opengl.Window;
 
 public class VerticallyDistributedPanelElement extends PanelElement {
 	protected double childHeight;
 	
 	public double scrollValue;
+	public double targetScrollValue;
 	
 	public VerticallyDistributedPanelElement(double startX, double startY, double endX, double endY, Color color, Runnable drawFunc, ShaderProgram program, double childHeight) {
 		super(startX, startY, endX, endY, color, drawFunc, program);
 		this.childHeight = childHeight;
 	}
 	
-	// onHovered is called before any other methods
 	@Override
-	public void update() {
-		int indx = 0;
-		for (Element child : children) {
+	public void update(double pct) {
+//		scrollValue += targetScrollValue;
+//		scrollValue /= 2;
+		scrollValue = ((1 -pct) * scrollValue) + ((pct) * targetScrollValue);
+		for (int indx = 0; indx < children.size(); indx++) {
+			Element child = children.get(indx);
+
 			// fillY would create an infinite scroll plane for one element if my implementation were setup for it, which it is not, but even if it was, allowing for it would be stupid
 			child.fillY = false;
 			// resize the child element and reposition it to account for scroll value, removed children, added children, etc
-			child.endY = endY - (indx++ * childHeight) + scrollValue;
-//			child.endY = scrollValue - endY - (indx++ * childHeight);
+			child.endY = endY - (indx * childHeight) + scrollValue;
 			child.startY = child.endY - childHeight;
+
+			// calling this while iterating instead of iterating twice manages to increase the framerate by 10 with 1 million child elements
+			child.update(pct);
 		}
-		super.update();
+	}
+	
+	@Override
+	public void onScroll(double mouseX, double mouseY, double posX, double posY, double dx, double dy, Window window) {
+//		super.onScroll(mouseX, mouseY, posX, posY, dx, dy, window);
+		targetScrollValue += (dy * -80);
+		if (targetScrollValue > getMaxScroll() - (endY - startY)) targetScrollValue = getMaxScroll() - (endY - startY);
+		if (targetScrollValue < 0) targetScrollValue = 0;
 	}
 	
 	@Override

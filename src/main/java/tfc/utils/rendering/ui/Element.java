@@ -14,6 +14,19 @@ public class Element {
 	protected boolean isRightAligned;
 	protected boolean fillY;
 	
+	protected Element focused;
+	protected boolean isFocused;
+	
+	public void revokeFocus() {
+		if (focused != null) focused.revokeFocus();
+		focused = null;
+		isFocused = false;
+	}
+	
+	public void grantFocus() {
+		isFocused = true;
+	}
+	
 	public Element setRightAligned(boolean val) {
 		isRightAligned = val;
 		return this;
@@ -27,19 +40,35 @@ public class Element {
 	protected final ArrayList<Element> children = new ArrayList<>();
 	
 	public Element(double startX, double startY, double endX, double endY) {
-//		if (startX > 255 || startX < 0) throw new RuntimeException("StartX is out of bounds, should be between 0 and 255 but is instead " + startX);
-//		if (startY > 255 || startY < 0) throw new RuntimeException("StartY is out of bounds, should be between 0 and 255 but is instead " + startY);
-//		if (endX > 255 || endX < 0) throw new RuntimeException("EndX is out of bounds, should be between 0 and 255 but is instead " + endX);
-//		if (endY > 255 || endY < 0) throw new RuntimeException("EndY is out of bounds, should be between 0 and 255 but is instead " + endY);
 		this.startX = startX;
 		this.startY = startY;
 		this.endX = endX;
 		this.endY = endY;
 	}
 	
-	public void update() {
+	public void update(double pct) {
 		for (Element child : children) {
-			child.update();
+			if (child.fillY) child.endY = endY;
+			child.update(pct);
+		}
+	}
+	
+	public void onTyped(char c, int key) {
+		if (focused != null) focused.onTyped(c, key);
+	}
+	
+	public void onScroll(double mouseX, double mouseY, double posX, double posY, double dx, double dy, Window window) {
+		for (Element child : children) {
+			if (!intersects(child)) continue;
+			double cPosX = child.startX + (posX * 2);
+			if (child.isRightAligned) {
+				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
+			}
+			cPosX /= 2;
+			double cPosY = child.startY - posY;
+			if (child.isInside(mouseX, mouseY, cPosX, cPosY)) {
+				child.onScroll(mouseX, mouseY, cPosX, cPosY, dx, dy, window);
+			}
 		}
 	}
 	
@@ -81,9 +110,6 @@ public class Element {
 	
 	public void onTick(double mouseX, double mouseY, double posX, double posY, Window window) {
 		for (Element child : children) {
-			if (child.fillY) {
-				child.endY = endY;
-			}
 			double cPosX = child.startX + (posX * 2);
 			if (child.isRightAligned) {
 				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
@@ -96,15 +122,13 @@ public class Element {
 	
 	public void onHovered(double mouseX, double mouseY, double posX, double posY, Window window) {
 		for (Element child : children) {
-			if (child.fillY) {
-				child.endY = endY;
-			}
+			if (!intersects(child)) continue;
 			double cPosX = child.startX + (posX * 2);
 			if (child.isRightAligned) {
 				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
 			cPosX /= 2;
-			double cPosY = child.startY - posY;
+			double cPosY = child.startX + (posY * 2);
 			if (child.isInside(mouseX, mouseY, cPosX, cPosY)) {
 				child.onHovered(mouseX, mouseY, cPosX, cPosY, window);
 			}
@@ -124,9 +148,7 @@ public class Element {
 		Matrix4 oldMatrix = baseMatrix;
 		Matrix4 oldBase = baseMatrix;
 		for (Element child : children) {
-			if (!intersects(child)) {
-				continue;
-			}
+			if (!intersects(child)) continue;
 			if (!child.isRightAligned) {
 //				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));
 				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));
@@ -145,17 +167,21 @@ public class Element {
 	
 	public boolean onClicked(double mouseX, double mouseY, double posX, double posY, int button) {
 		for (Element child : children) {
-			if (child.fillY) {
-				child.endY = endY;
-			}
+			if (!intersects(child)) continue;
 			double cPosX = child.startX + (posX * 2);
 			if (child.isRightAligned) {
 				cPosX = Math.abs(startX - endX) - child.startX + (posX * 2);
 			}
 			cPosX /= 2;
-			double cPosY = child.startY - posY;
+			double cPosY = child.startX + (posY * 2);
 			if (child.isInside(mouseX, mouseY, cPosX, cPosY)) {
-				if (child.onClicked(mouseX, mouseY, cPosX, cPosY, button)) return true;
+				if (focused != null) focused.revokeFocus();
+				focused = child;
+				child.grantFocus();
+				isFocused = false;
+				if (child.onClicked(mouseX, mouseY, cPosX, cPosY, button)) {
+					return true;
+				}
 			}
 		}
 		return false;
