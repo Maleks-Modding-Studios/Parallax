@@ -37,6 +37,12 @@ public class Element {
 		this.endY = endY;
 	}
 	
+	public void update() {
+		for (Element child : children) {
+			child.update();
+		}
+	}
+	
 	public boolean isInside(double mouseX, double mouseY, double posX, double posY) {
 		mouseX -= posX;
 		mouseY -= posY;
@@ -68,7 +74,7 @@ public class Element {
 //		double h = other.endY;
 //
 //		if (w > startX && h > startY && startX < x && y < endY) {
-			children.add(other);
+		children.add(other);
 //		}
 		return other;
 	}

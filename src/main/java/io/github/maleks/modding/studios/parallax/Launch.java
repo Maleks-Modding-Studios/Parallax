@@ -5,7 +5,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL20;
 import tfc.utils.rendering.general.Color;
 import tfc.utils.rendering.ui.PanelElement;
-import tfc.utils.rendering.ui.ResizePolicy;
+import tfc.utils.rendering.ui.VerticallyDistributedPanelElement;
 import tfc.utils.vecmath.Matrix4;
 import tfc.utils.vecmath.Vector4;
 import tfc.wrappers.opengl.Shader;
@@ -91,48 +91,38 @@ public class Launch {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}, shaderProgram, window);
-//		panel.addChild(
-//				new PanelElement(
-//						330, 0, 300, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
-//					glBindBuffer(GL_ARRAY_BUFFER, buffer);
-//					glDrawArrays(GL_TRIANGLES, 0, 6);
-//					glBindBuffer(GL_ARRAY_BUFFER, 0);
-//				}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned(true).setFillY(true)
-//		);
-		boolean right = false;
-		for (int i = 0; i < 2; i++) {
-			PanelElement panel1 =
-					(PanelElement) new PanelElement(
-							right ? 40 : 200, 0, right ? 200 : 40, 255, new Color(200, 200, 255, 255).darker(0.25f, 32f), () -> {
+		
+		VerticallyDistributedPanelElement panel1 = (VerticallyDistributedPanelElement) new VerticallyDistributedPanelElement(
+				0, 0, 340, 255,
+				new Color(200, 200, 255).darker(0.25f, 32f),
+				() -> {
+					glBindBuffer(GL_ARRAY_BUFFER, buffer);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}, shaderProgram, 40
+		).setFillY(true);
+		for (int i = 0; i < 1000; i++) {
+			PanelElement element = new PanelElement(
+					8, 0, 300 - 7, 255,
+					new Color(200, 200, 255).darker(0.1f, 32f),
+					() -> {
 						glBindBuffer(GL_ARRAY_BUFFER, buffer);
 						glDrawArrays(GL_TRIANGLES, 0, 6);
 						glBindBuffer(GL_ARRAY_BUFFER, 0);
-					}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned((right = !right)).setFillY(true);
-			panel.addChild(panel1);
-			panel1.addChild(
-					new PanelElement(
-							20, 0, 80, 255, new Color(200, 200, 255, 255).darker(0.2f, 32f), () -> {
-						glBindBuffer(GL_ARRAY_BUFFER, buffer);
-						glDrawArrays(GL_TRIANGLES, 0, 6);
-						glBindBuffer(GL_ARRAY_BUFFER, 0);
-					}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setFillY(true)
-			).addChild(
-					new PanelElement(
-							20, 0, 50, 255, new Color(200, 200, 255, 255).darker(0.1f, 32f), () -> {
-						glBindBuffer(GL_ARRAY_BUFFER, buffer);
-						glDrawArrays(GL_TRIANGLES, 0, 6);
-						glBindBuffer(GL_ARRAY_BUFFER, 0);
-					}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setFillY(true)
+					}, shaderProgram
 			);
-			panel1.addChild(
-					new PanelElement(
-							80, 0, 60, 255, new Color(200, 200, 255, 255).darker(0.2f, 32f), () -> {
+			element.addChild(new PanelElement(
+					0, 1, 300 - 15, 38,
+					new Color(200, 200, 255).darker(0.5f, 32f),
+					() -> {
 						glBindBuffer(GL_ARRAY_BUFFER, buffer);
 						glDrawArrays(GL_TRIANGLES, 0, 6);
 						glBindBuffer(GL_ARRAY_BUFFER, 0);
-					}, shaderProgram).setResizePolicy(new ResizePolicy(true, true, false, false)).setRightAligned(true).setFillY(true)
-			);
+					}, shaderProgram
+			));
+			panel1.addChild(element);
 		}
+		panel.addChild(panel1);
 		
 		while (isOpen[0]) {
 			mainLoop();
@@ -165,6 +155,7 @@ public class Launch {
 		)));
 		
 		window.setCursor(GLFW.GLFW_ARROW_CURSOR);
+		panel.update();
 		panel.onHovered(window.getMouseX(), window.getMouseY(), 0, 0, window);
 		if (window.isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
 			if (!lastFrameMouseStates[0]) {
