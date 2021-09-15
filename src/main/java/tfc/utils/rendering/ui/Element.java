@@ -111,10 +111,22 @@ public class Element {
 		}
 	}
 	
+	public boolean intersects(Element other) {
+		return (
+				other.getEndX() > 0 &&
+				other.getEndY() > 0 &&
+				other.getStartX() < (endX - startX) &&
+				other.getStartY() < (endY - startY)
+		);
+	}
+	
 	public void draw(Matrix4 matrix4, Matrix4 baseMatrix) {
 		Matrix4 oldMatrix = baseMatrix;
 		Matrix4 oldBase = baseMatrix;
 		for (Element child : children) {
+			if (!intersects(child)) {
+				continue;
+			}
 			if (!child.isRightAligned) {
 //				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));
 				matrix4 = oldMatrix.multiply(Matrix4.createTranslationMatrix(new Vector4(child.startX, child.startY, 0, 1)));

@@ -1,6 +1,7 @@
 package tfc.utils.rendering.ui;
 
 import tfc.utils.rendering.general.Color;
+import tfc.utils.vecmath.Matrix4;
 import tfc.wrappers.opengl.ShaderProgram;
 
 public class VerticallyDistributedPanelElement extends PanelElement {
@@ -26,6 +27,11 @@ public class VerticallyDistributedPanelElement extends PanelElement {
 			child.startY = child.endY - childHeight;
 		}
 		super.update();
+	}
+	
+	@Override
+	public void draw(Matrix4 thisMatrix, Matrix4 baseMatrix) {
+		super.draw(thisMatrix, baseMatrix);
 	}
 	
 	public double getMaxScroll() {

@@ -101,7 +101,7 @@ public class Launch {
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}, shaderProgram, 40
 		).setFillY(true);
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			PanelElement element = new PanelElement(
 					8, 0, 300 - 7, 255,
 					new Color(200, 200, 255).darker(0.1f, 32f),
