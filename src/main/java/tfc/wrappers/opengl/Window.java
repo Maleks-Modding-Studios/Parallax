@@ -129,4 +129,8 @@ public class Window {
 	public boolean isMouseButtonDown(int button) {
 		return glfwGetMouseButton(handle, button) == GLFW_PRESS;
 	}
+	
+	public boolean isKeyPressed(int key) {
+		return keyPressStates.containsKey(key) && keyPressStates.get(key);
+	}
 }

@@ -9,7 +9,7 @@ public class Test1 {
 		Window w = new Window();
 		w.setVisible(true);
 		boolean[] isOpen = new boolean[]{true};
-		w.addCloseListener((window) -> isOpen[0] = false);
+		w.setCloseListener((window) -> isOpen[0] = false);
 		
 		w.grabContext();
 		w.setCursor(GLFW.GLFW_HRESIZE_CURSOR);

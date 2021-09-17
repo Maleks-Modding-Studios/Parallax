@@ -54,4 +54,9 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 
     implementation 'plexus:plexus-compiler-javac:1.5'
+
+    // https://mvnrepository.com/artifact/org.apache.pdfbox/fontbox
+    implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.0'
+
+    compile "io.github.earcut4j:earcut4j:2.2.2"
 }

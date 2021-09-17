@@ -3,8 +3,12 @@ package io.github.maleks.modding.studios.parallax;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL20;
+import tfc.utils.misc.Rectangle2D;
+import tfc.utils.rendering.font.Font;
 import tfc.utils.rendering.general.Color;
+import tfc.utils.rendering.gl.Stencil;
 import tfc.utils.rendering.ui.PanelElement;
+import tfc.utils.rendering.ui.TextElement;
 import tfc.utils.rendering.ui.VerticallyDistributedPanelElement;
 import tfc.utils.vecmath.Matrix4;
 import tfc.utils.vecmath.Vector4;
@@ -22,6 +26,8 @@ public class Launch {
 	public static ShaderProgram shaderProgram;
 	public static int buffer;
 	public static PanelElement panel;
+	
+	public static Stencil stencil = new Stencil();
 	
 	protected static boolean[] lastFrameMouseStates = new boolean[]{false, false, false};
 	
@@ -76,18 +82,25 @@ public class Launch {
 				0.0f, 1.0f, 0.0f, 1.0f,
 				1.0f, 0.0f, 0.0f, 1.0f,
 				1.0f, 1.0f, 0.0f, 1.0f,
-				0.0f, 1.0f, 0.0f, 1.0f
+				0.0f, 1.0f, 0.0f, 1.0f,
 		}, GL_STATIC_DRAW);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
-		glEnableVertexAttribArray(0);
+//		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+//		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		
+		Font font = null;
+		try {
+			font = new Font("what/JetBrainsMonoNL-Regular.ttf");
+		} catch (Throwable ignored) {
+			ignored.printStackTrace();
+		}
 		
 		window.releaseContext();
 		
 		panel = new MainPanel(0, 0, 255, 255, new Color(225, 225, 255, 255).darker(0.3f, 16f), () -> {
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
+			glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+			glEnableVertexAttribArray(0);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}, shaderProgram, window);
@@ -97,7 +110,9 @@ public class Launch {
 		});
 		
 		window.setKeyListener((window1, key, scan, action, mods) -> {
-			panel.onTyped((char) key, key);
+			if (action == 2 || action == 1) {
+				panel.onTyped((char) key, key);
+			}
 		});
 		
 		VerticallyDistributedPanelElement panel1 = (VerticallyDistributedPanelElement) new VerticallyDistributedPanelElement(
@@ -105,6 +120,8 @@ public class Launch {
 				new Color(225, 225, 255).darker(0.25f, 16f),
 				() -> {
 					glBindBuffer(GL_ARRAY_BUFFER, buffer);
+					glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+					glEnableVertexAttribArray(0);
 					glDrawArrays(GL_TRIANGLES, 0, 6);
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}, shaderProgram, 40
@@ -115,22 +132,18 @@ public class Launch {
 					new Color(225, 225, 255).darker(0.5f, 16f),
 					() -> {
 						glBindBuffer(GL_ARRAY_BUFFER, buffer);
+						glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+						glEnableVertexAttribArray(0);
 						glDrawArrays(GL_TRIANGLES, 0, 6);
 						glBindBuffer(GL_ARRAY_BUFFER, 0);
 					}, shaderProgram
 			);
-//			element.addChild(new PanelElement(
-//					0, 2, 300 - 15, 38,
-//					new Color(i % 255, 200, 255).darker(0.5f, 32f),
-//					() -> {
-//						glBindBuffer(GL_ARRAY_BUFFER, buffer);
-//						glDrawArrays(GL_TRIANGLES, 0, 6);
-//						glBindBuffer(GL_ARRAY_BUFFER, 0);
-//					}, shaderProgram
-//			));
 			panel1.addChild(element);
 		}
 		panel.addChild(panel1);
+		
+		TextElement textElement = new TextElement(0, 0, 255, 255, font, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		panel1.addChild(textElement);
 		
 		while (isOpen[0]) {
 			mainLoop();
@@ -147,6 +160,8 @@ public class Launch {
 		GL20.glDeleteBuffers(buffer);
 		window.releaseContext();
 		
+		font.delete();
+		
 		Runtime.getRuntime().exit(0);
 	}
 	
@@ -154,6 +169,7 @@ public class Launch {
 	
 	private static void mainLoop() {
 //		long startTime = System.nanoTime();
+		stencil.set(new Rectangle2D(0, 0, window.getWidth(), window.getHeight()));
 		
 		window.grabContext();
 		window.startFrame();
